@@ -4,10 +4,12 @@ require "tempfile"
 
 module EachInParallel
   RSpec.describe MultiProcess do
+    class TestError < StandardError; end
+
     it "run in multiProcess" do
       f = Tempfile.new
 
-      MultiProcess.each(0..3, processes: 4) do |n|
+      MultiProcess.each(0..3, processes: 4) do
         f << Process.pid.to_s + "\n"
         sleep 0.01
       end
@@ -21,26 +23,26 @@ module EachInParallel
       expect {
         ms = Benchmark.realtime do
           MultiProcess.each(0..39, processes: 4) do |n|
-            raise if n == 0
+            raise TestError if n == 0
 
             sleep 0.01
           end
         end
         expect(ms).to be < 0.02
-      }.to raise_error(EachInParallel::Error)
+      }.to raise_error(TestError)
     end
 
     it "accepts infinite enumerator" do
       expect {
         ms = Benchmark.realtime do
           MultiProcess.each(0.., processes: 4) do |n|
-            raise if n == 0
+            raise TestError if n == 0
 
             sleep 0.01
           end
         end
         expect(ms).to be < 0.02
-      }.to raise_error(EachInParallel::Error)
+      }.to raise_error(TestError)
     end
   end
 end

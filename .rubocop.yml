@@ -102,6 +102,9 @@ Style/PercentLiteralDelimiters:
     '%w': '()'
     '%r': '()'
 
+Style/RescueStandardError:
+  Enabled: false
+
 Style/SpecialGlobalVars:
   Enabled: false
 
