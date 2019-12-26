@@ -6,7 +6,7 @@ module EachInParallel
     it "run in multithread" do
       r = []
 
-      MultiThread.each(0..3, thread: 4) do |n|
+      MultiThread.each(0..3, threads: 4) do |n|
         r[n] = Thread.current.object_id
         sleep 0.01
       end
@@ -17,7 +17,7 @@ module EachInParallel
     it "catch exception in any thread" do
       expect {
         ms = Benchmark.realtime do
-          MultiThread.each(0..39, thread: 4) do |n|
+          MultiThread.each(0..39, threads: 4) do |n|
             raise if n == 0
 
             sleep 0.01
@@ -30,7 +30,7 @@ module EachInParallel
     it "accepts infinite enumerator" do
       expect {
         ms = Benchmark.realtime do
-          MultiThread.each(0.., thread: 4) do |n|
+          MultiThread.each(0.., threads: 4) do |n|
             raise if n == 0
 
             sleep 0.01

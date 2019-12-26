@@ -19,15 +19,13 @@ module EachInParallel
       @enumerable = enumerable
     end
 
-    def each_with_index(options = {}, &block)
+    def each_with_index(threads: DEFAULT_NUM_OF_WORKERS, map: false, &block)
       return @enumerable.each_with_index(&block) if disable?
 
-      thread_count = options[:thread] || DEFAULT_NUM_OF_WORKERS
-      queue_size = options[:queue] || thread_count
-      queue = SizedQueue.new(queue_size)
+      queue = SizedQueue.new(threads)
       result = []
       exception = nil
-      threads = thread_count.times.map {
+      workers = threads.times.map {
         Thread.new {
           loop do
             break if exception
@@ -45,7 +43,7 @@ module EachInParallel
             end
             # rubocop:enable Lint/RescueException
 
-            result[i] = r if options[:map]
+            result[i] = r if map
           end
         }
       }
@@ -55,30 +53,30 @@ module EachInParallel
 
         queue << [v, i]
       }
-      thread_count.times { queue << [TERMINATER, nil] }
+      threads.times { queue << [TERMINATER, nil] }
 
-      threads.each(&:join)
+      workers.each(&:join)
       raise exception if exception # 最後の要素で例外が起こった場合、ここで raise
 
-      options[:map] ? result : @enumerable
+      map ? result : @enumerable
     end
 
-    def each(options = {}, &block)
+    def each(**options, &block)
       return @enumerable.each(&block) if disable?
 
-      each(options) {|v| yield v }
+      each_with_index(**options) {|v, _| yield v }
     end
 
-    def map_with_index(options = {}, &block)
+    def map_with_index(**options, &block)
       return @enumerable.each_with_index.map(&block) if disable?
 
-      each_with_index(options.merge(map: true)) {|v, i| yield v, i }
+      each_with_index(map: true, **options) {|v, i| yield v, i }
     end
 
-    def map(options = {}, &block)
+    def map(**options, &block)
       return @enumerable.map(&block) if disable?
 
-      map_with_index(options) {|v| yield v }
+      map_with_index(**options) {|v| yield v }
     end
 
     def disable?
