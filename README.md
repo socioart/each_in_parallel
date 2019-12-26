@@ -1,28 +1,35 @@
 # EachInParallel
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/each_in_parallel`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+`each` in multi threads and/or multi process.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'each_in_parallel'
+gem 'each_in_parallel', git: "https://github.com/socioart/each_in_parallel.git"
 ```
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install each_in_parallel
-
 ## Usage
 
-TODO: Write usage instructions here
+Pass enumerable and block. The block will execute in parallel for each item.
+Enumeration is executed lazily.
+
+```ruby
+begin
+  EachInParallel.each_in_threads(1..) {|n| raise StopIteration if n > 10 }
+rescue StopIteration
+end
+
+begin
+  EachInParallel.each_in_processes(1..) {|n| raise StopIteration if n > 10 }
+rescue StopIteration
+end
+```
 
 ## Development
 
