@@ -40,11 +40,11 @@ module EachInParallel
               _, s = Process.waitpid2(cid)
               raise EachInParallel::Error, "Worker process exited with #{s.to_i >> 8}" unless s.success?
 
-              e = exception_read.gets
+              e = exception_read.read
               exception_read.close
 
               # rubocop:disable Security/MarshalLoad
-              raise Marshal.load(e) unless e.nil?
+              raise Marshal.load(e) unless e.size == 0
               # rubocop:enable Security/MarshalLoad
             },
           )
